@@ -1,0 +1,3 @@
+<div class="input-errors" ng-show="(form.$submitted || input.$dirty || input.$touched) && input.$invalid">
+  <p ng-repeat="(kind, _) in input.$error" ng-show="$first" class="help-block" ng-bind="messages[kind]"></p>
+</div>

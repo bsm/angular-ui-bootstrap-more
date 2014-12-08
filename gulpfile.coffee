@@ -63,7 +63,7 @@ gulp.task 'test', ['dist', 'test:prepare'], ->
     './node_modules/angular/angular.js'
     './node_modules/angular-mocks/angular-mocks.js'
     './dist/**/*.js'
-    './test/**/*.js'
+    './src/**/*_test.coffee'
   ]
     .pipe karma(configFile: 'karma.conf.js', action: 'run')
 

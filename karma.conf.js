@@ -4,7 +4,12 @@ module.exports = function(config) {
     frameworks: ['jasmine'],
     files:      [],
     exclude:    [],
-    preprocessors: {},
+    preprocessors: {
+      '**/*.coffee': 'coffee'
+    },
+    coffeePreprocessor: {
+      options: { sourceMap: true }
+    },
     reporters: ['progress'],
     port: 9876,
     colors: true,

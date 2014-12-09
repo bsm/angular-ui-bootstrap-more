@@ -115,3 +115,48 @@ mod.directive 'bsSelect', (bsFormBuilderConfig, bsFormBuilder) ->
         bsFormBuilder(scope, element, input, attrs, ctrl)
         return
   }
+
+mod.directive 'bsFormGroup', ->
+  titleize = (name) ->
+    words = for word in name.replace(/([A-Z])/g, ' $1').split(' ')
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    words.join(' ')
+
+  controller = ["$element", "$attrs", ($element, $attrs) ->
+    unless $attrs.model?
+       throw new Error("form-group element has no model attribute")
+
+    @$model = $attrs.model
+    [@$modelName, @$attrName, ...] = @$model.split('.')
+    @$name  = $attrs.name || @$attrName
+    @$for   = $attrs.for || @$model.replace('.', '_')
+    return
+  ]
+
+  {
+    restrict:   'AE'
+    require:    ['^form', 'bsFormGroup']
+    scope:      {}
+    tranclude:  true
+    controller: controller
+    link: (scope, element, attrs, ctrls) ->
+      form = ctrls[0]
+      ctrl = ctrls[1]
+
+      # Store form reference
+      ctrl.$form = form
+
+      # Inherit model from parent scope
+      scope[ctrl.$modelName] = scope.$parent[ctrl.$modelName] ? {}
+
+      # Label
+      label = angular.element('<label class="control-label"></label>')
+      label.text(attrs.label || titleize(ctrl.$name))
+      label.attr('for', ctrl.$for)
+      label.addClass(attrs.labelClass) if attrs.labelClass
+
+      element.addClass('form-group')
+      element.prepend(label)
+
+      return
+  }

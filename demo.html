@@ -14,47 +14,73 @@
     <div class="row">
       <form name="form" class="col-sm-8" ng-submit="onSubmit(form)" novalidate>
 
-        <div class="row">
-          <input type="text" required
-            ng-model="movie.title"
-            ng-minlength="2"
-            ng-maxlength="50"
-            bs-form-group="{wrapClass: 'col-sm-8 has-feedback', label: 'Movie title', labelClass: 'test'}" />
-
-          <select required
-            ng-model="movie.genre"
-            ng-options="genre.name as genre.label for genre in genres"
-            bs-form-group="{wrapClass: 'col-sm-4'}"><option value="">-- Please select --</option></select>
+        <!-- Simple email/text input  -->
+        <div class="form-group">
+          <input type="email" required
+            ng-model="movie.email"
+            placeholder="Please enter your email address" />
         </div>
 
+        <!-- Two columns  -->
         <div class="row">
-          <input type="text" ng-model="movie.director" bs-form-group="{wrapClass: 'col-sm-4'}" />
-          <input type="text" ng-model="movie.writer" bs-form-group="{wrapClass: 'col-sm-4'}" />
-          <input
-            type="number"
-            ng-model="movie.budget"
-            required
-            min="1"
-            max="200000000"
-            bs-form-group="{wrapClass: 'col-sm-4', prefixIcon: 'fa fa-dollar'}" />
+          <div class="form-group col-sm-8" label="Movie title">
+            <input type="text" required ng-model="movie.title" ng-minlength="2" ng-maxlength="50"
+              placeholder="Please enter the movie title" />
+          </div>
+
+          <div class="form-group col-sm-4">
+            <select required ng-model="movie.genre" ng-options="genre.name as genre.label for genre in genres">
+              <option value="">-- Please select --</option>
+            </select>
+          </div>
         </div>
 
-        <input type="url" ng-model="movie.url" required bs-form-group="{label: 'Website'}" />
-        <input type="url" ng-model="movie.trailer" bs-form-group />
-        <textarea ng-model="movie.review" rows="8" required bs-form-group></textarea>
+        <!-- Three columns & numeric input with prefix-icon -->
+        <div class="row">
+          <div class="form-group col-sm-4">
+            <input type="text" ng-model="movie.director" />
+          </div>
+
+          <div class="form-group col-sm-4">
+            <input type="text" ng-model="movie.writer" />
+          </div>
+
+          <div class="form-group col-sm-4">
+            <input type="number" ng-model="movie.budget" required min="1" max="200000000"
+              prefix-icon="fa fa-dollar" />
+          </div>
+        </div>
+
+        <!-- URLs -->
+        <div class="form-group" label="Website">
+          <input type="url" ng-model="movie.url" required />
+        </div>
 
         <div class="form-group">
-          <label class="radio-inline">
-            <input type="radio" ng-model="movie.rating" value="terrible" /> Terrible
-          </label>
-          <label class="radio-inline">
-            <input type="radio" ng-model="movie.rating" value="watchable" /> Watchable
-          </label>
-          <label class="radio-inline">
-            <input type="radio" ng-model="movie.rating" value="best" /> Five Stars!
-          </label>
+          <input type="url" ng-model="movie.trailer" />
         </div>
 
+        <!-- Textarea -->
+        <div class="form-group">
+          <textarea ng-model="movie.review" rows="8" required></textarea>
+        </div>
+
+        <!-- Custom form-group -->
+        <div class="form-group" nolabel>
+          <div>
+            <label class="radio-inline">
+              <input type="radio" name="rating" ng-model="movie.rating" value="terrible" required /> Terrible
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="rating" ng-model="movie.rating" value="watchable" required /> Watchable
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="rating" ng-model="movie.rating" value="best" required /> Five Stars!
+            </label>
+          </div>
+        </div>
+
+        <!-- Submit or cancel -->
         <bs:submit></bs:submit>
 
       </form>
@@ -71,7 +97,7 @@
       'ui.bootstrap.more.form-builder',
     ])
       .controller('DemoCtrl', ["$scope", function($scope) {
-        $scope.movie = {rating: 'terrible'};
+        $scope.movie = {};
         $scope.genres = [
           {name: "action", label: "Action" },
           {name: "comedy", label: "Comedy" },

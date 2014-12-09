@@ -19,73 +19,101 @@ describe 'directive: bsInputErrors', ->
       <form name="form">
         <input type="name" ng-model="model.name" name="name" required minlength="3" ng-maxlength="30" pattern="^[a-z]+$" />
         <div bs-input-errors messages="{pattern: 'lowercase only'}" name="name"></div>
+
         <input type="email" ng-model="model.email" name="email" required />
         <bs-input-errors messages="{required: 'not set'}" name="email"></bs-input-errors>
-        <input type="number" ng-model="model.number" name="number" min="100" max="200" />
-        <div bs-input-errors name="number"></div>
+
+        <div class="form-group">
+          <input type="number" ng-model="model.number" name="number" min="100" max="200" />
+          <div bs-input-errors name="number"></div>
+        </div>
       </form>
     """
     scope = $rootScope
     scope.model =
       name: "username"
       email: "me@home.com"
+      number: 150
 
     $compile(element)(scope)
     scope.$digest()
   )
 
+  select = (q) ->
+    el = element[0].querySelector(q)
+    angular.element(el)
+  errorsOn = (name) ->
+    select("[name='#{name}'] p.help-block")
+
   it 'should render', ->
-    expect(element[0].children.length).toEqual(6)
+    expect(element.children().length).toEqual(5)
 
   it 'should validate required', ->
     scope.form.name.$setViewValue('')
-    expect(element[0].children[1].children.length).toEqual(1)
-    expect(element[0].children[3].children.length).toEqual(0)
-    expect(element[0].children[5].children.length).toEqual(0)
-    expect(element.text()).toContain('is required')
+    expect(errorsOn('name').length).toEqual(1)
+    expect(errorsOn('email').length).toEqual(0)
+    expect(errorsOn('number').length).toEqual(0)
+    expect(errorsOn('name').text()).toEqual('is required')
 
   it 'should validate minlength', ->
     scope.form.name.$setViewValue('ab')
-    expect(element[0].children[1].children.length).toEqual(1)
-    expect(element[0].children[3].children.length).toEqual(0)
-    expect(element[0].children[5].children.length).toEqual(0)
-    expect(element.text()).toContain('too short, minimum 3 characters')
+    expect(errorsOn('name').length).toEqual(1)
+    expect(errorsOn('email').length).toEqual(0)
+    expect(errorsOn('number').length).toEqual(0)
+    expect(errorsOn('name').text()).toEqual('too short, minimum 3 characters')
 
   it 'should validate maxlength', ->
     scope.form.name.$setViewValue('abcdefghijabcdefghijabcdefghijabcdefghij')
-    expect(element[0].children[1].children.length).toEqual(1)
-    expect(element[0].children[3].children.length).toEqual(0)
-    expect(element[0].children[5].children.length).toEqual(0)
-    expect(element.text()).toContain('too long, maximum 30 characters')
+    expect(errorsOn('name').length).toEqual(1)
+    expect(errorsOn('email').length).toEqual(0)
+    expect(errorsOn('number').length).toEqual(0)
+    expect(errorsOn('name').text()).toEqual('too long, maximum 30 characters')
 
   it 'should validate pattern', ->
     scope.form.name.$setViewValue('ABCD')
-    expect(element[0].children[1].children.length).toEqual(1)
-    expect(element[0].children[3].children.length).toEqual(0)
-    expect(element[0].children[5].children.length).toEqual(0)
-    expect(element.text()).toContain('lowercase only')
+    expect(errorsOn('name').length).toEqual(1)
+    expect(errorsOn('email').length).toEqual(0)
+    expect(errorsOn('number').length).toEqual(0)
+    expect(errorsOn('name').text()).toEqual('lowercase only')
 
   it 'should validate emails', ->
     scope.form.email.$setViewValue('BADEMAIL')
-    expect(element[0].children[1].children.length).toEqual(0)
-    expect(element[0].children[3].children.length).toEqual(1)
-    expect(element[0].children[5].children.length).toEqual(0)
-    expect(element.text()).toContain('is not a valid email address')
+    expect(errorsOn('name').length).toEqual(0)
+    expect(errorsOn('email').length).toEqual(1)
+    expect(errorsOn('number').length).toEqual(0)
+    expect(errorsOn('email').text()).toEqual('is not a valid email address')
 
   it 'should validate numbers', ->
     scope.form.number.$setViewValue('NOTNUM')
-    expect(element[0].children[1].children.length).toEqual(0)
-    expect(element[0].children[3].children.length).toEqual(0)
-    expect(element[0].children[5].children.length).toEqual(1)
-    expect(element.text()).toContain('not a number')
+    expect(errorsOn('name').length).toEqual(0)
+    expect(errorsOn('email').length).toEqual(0)
+    expect(errorsOn('number').length).toEqual(1)
+    expect(errorsOn('number').text()).toEqual('is not a number')
 
     scope.form.number.$setViewValue('90')
-    expect(element[0].children[5].children.length).toEqual(1)
-    expect(element.text()).toContain('must be at least 100')
+    expect(errorsOn('number').text()).toEqual('must be at least 100')
 
     scope.form.number.$setViewValue('210')
-    expect(element[0].children[5].children.length).toEqual(1)
-    expect(element.text()).toContain('must not be over 200')
+    expect(errorsOn('number').text()).toEqual('must not be over 200')
 
     scope.form.number.$setViewValue('150')
-    expect(element[0].children[5].children.length).toEqual(0)
+    expect(errorsOn('number').length).toEqual(0)
+
+  it 'should toggle has-success/error', ->
+    classes = -> select('.form-group')[0].getAttribute('class')
+    expect(classes()).toBe("form-group")
+
+    scope.$apply ->
+      scope.form.number.$setViewValue('50')
+      scope.form.number.$setTouched()
+    expect(classes()).toBe("form-group has-error")
+
+    scope.$apply ->
+      scope.form.number.$setViewValue('120')
+      scope.form.number.$setTouched()
+    expect(classes()).toBe("form-group has-success")
+
+    scope.$apply ->
+      scope.form.number.$setViewValue('150')
+      scope.form.number.$setPristine()
+    expect(classes()).toBe("form-group")

@@ -26,9 +26,17 @@
   });
 
   mod.directive('bsInputErrors', ["$interpolate", "bsInputErrorsConfig", function($interpolate, bsInputErrorsConfig) {
-    var postLink;
+    var findParentGroup, postLink;
+    findParentGroup = function(element) {
+      while (element.length && !element.hasClass('form-group')) {
+        element = element.parent();
+      }
+      if (element.length) {
+        return element;
+      }
+    };
     postLink = function(scope, element, attrs, form) {
-      var input, kind, messages, msg, name, vals, _ref;
+      var formGroup, input, kind, limits, messages, msg, name, touched, _ref;
       name = $interpolate(attrs.name || '', false)(scope);
       scope.input = form[name];
       messages = angular.copy(bsInputErrorsConfig.messages);
@@ -39,7 +47,7 @@
       if (input != null) {
         input = angular.element(input);
       }
-      vals = {
+      limits = {
         min: attrs.min || (input != null ? input.attr('min') : void 0),
         max: attrs.max || (input != null ? input.attr('max') : void 0),
         minlength: attrs.minlength || (input != null ? input.attr('minlength') : void 0) || (input != null ? input.attr('ng-minlength') : void 0),
@@ -48,7 +56,24 @@
       scope.messages = {};
       for (kind in messages) {
         msg = messages[kind];
-        scope.messages[kind] = $interpolate(msg)(vals);
+        scope.messages[kind] = $interpolate(msg)(limits);
+      }
+      touched = function() {
+        return form && form[name] && (form.$submitted || form[name].$touched);
+      };
+      scope.hasSuccess = function() {
+        return touched() && form[name].$dirty && form[name].$valid;
+      };
+      scope.hasError = function() {
+        return touched() && form[name].$invalid;
+      };
+      if (formGroup = findParentGroup(element.parent())) {
+        scope.$watch(scope.hasError, function(value) {
+          return formGroup.toggleClass('has-error', value);
+        });
+        scope.$watch(scope.hasSuccess, function(value) {
+          return formGroup.toggleClass('has-success', value);
+        });
       }
     };
     return {
@@ -62,4 +87,4 @@
 
 }).call(this);
 
-angular.module("ui.bootstrap.more.input-errors").run(["$templateCache", function($templateCache) {$templateCache.put("template/ui-bootstrap-more/input-errors/input-errors.html","<p ng-repeat=\"(kind, _) in input.$error\" ng-show=\"$first\" class=\"help-block\" ng-bind=\"messages[kind]\"></p>\n");}]);
+angular.module("ui.bootstrap.more.input-errors").run(["$templateCache", function($templateCache) {$templateCache.put("template/ui-bootstrap-more/input-errors/input-errors.html","<div ng-show=\"hasError()\">\n  <p ng-repeat=\"(kind, _) in input.$error\" ng-show=\"$first\" class=\"help-block\" ng-bind=\"messages[kind]\"></p>\n</div>\n");}]);

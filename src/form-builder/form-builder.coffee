@@ -1,6 +1,12 @@
 mod = angular.module 'ui.bootstrap.more.form-builder', []
 
-# Submit directive
+mod.factory 'bsInputAddonBuilder', ->
+  (element, position, content, icon) ->
+    content = "<i class=\"#{icon}\" />" if icon?
+    addon   = angular.element('<div class="input-group-addon"></div>')
+      .append(angular.element(content))
+    element.wrap('<div class="input-group"></div>').parent()[position](addon)
+
 mod.directive 'bsSubmit', ($window) ->
   onLink = (scope, element, attrs) ->
     attrs.label ||= 'Save'
@@ -17,93 +23,109 @@ mod.directive 'bsSubmit', ($window) ->
     templateUrl: 'template/ui-bootstrap-more/form-builder/submit.html'
   }
 
-mod.directive 'bsFormGroup', ($compile) ->
-  titleize = (name) ->
-    words = for word in name.replace(/([A-Z])/g, ' $1').split(' ')
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    words.join(' ')
+mod.directive 'prefixIcon', (bsInputAddonBuilder) ->
+  {
+    restrict:  'A'
+    require:   'ngModel'
+    link:      (scope, element, attrs) ->
+      bsInputAddonBuilder(element, 'prepend', "", attrs.prefixIcon)
+  }
 
-  inputAddon = (content, icon) ->
-    content = "<i class=\"#{icon}\" />" if icon?
-    angular.element('<div class="input-group-addon"></div>')
-      .append(angular.element(content))
+mod.directive 'prefix', (bsInputAddonBuilder) ->
+  {
+    restrict: 'A'
+    require:   'ngModel'
+    link:     (scope, element, attrs) -> bsInputAddonBuilder(element, 'prepend', attrs.prefix, "")
+  }
 
-  controller = ['$element', '$scope', '$attrs', ($element, $scope, $attrs) ->
-    @form = @input = undefined
+mod.directive 'suffixIcon', (bsInputAddonBuilder) ->
+  {
+    restrict:  'A'
+    require:   'ngModel'
+    link:      (scope, element, attrs) -> bsInputAddonBuilder(element, 'append', "", attrs.suffixIcon)
+  }
 
-    formGroup = ->
-      node = $element.parent()
-      node = node.parent() while node.length && !node.hasClass('form-group')
-      node
-    isTouched = =>
-      @form && @input && (@form.$submitted || @input.$touched)
-    $scope.hasSuccess = =>
-      isTouched() && @input.$dirty && @input.$valid
-    $scope.hasError = =>
-      isTouched() && @input.$invalid
+mod.directive 'suffix', (bsInputAddonBuilder) ->
+  {
+    restrict: 'A'
+    require:  'ngModel'
+    link:     (scope, element, attrs) -> bsInputAddonBuilder(element, 'append', attrs.suffix, "")
+  }
 
-    $scope.$watch $scope.hasError, (value) ->
-      formGroup().toggleClass('has-error', value)
+mod.directive 'formGroup', ($compile) ->
+
+  controller = ['$scope', '$element', '$attrs', (scope, element, attrs) ->
+    label = errors = undefined
+
+    # Insert control label
+    @controlLabel = (caption, target) ->
+      return if attrs.nolabel
+
+      unless label
+        label = angular.element('<label class="control-label"></label>')
+        label.text(attrs.label || caption)
+        label.addClass(attrs.labelClass) if attrs.labelClass
+        element.prepend(label)
+
+      if target && label && !label.for
+        label.attr('for', target)
       return
-    $scope.$watch $scope.hasSuccess, (value) ->
-      formGroup().toggleClass('has-success', value)
+
+    # Insert input errors
+    @inputErrors = (name) ->
+      return if attrs.noerrors
+      unless errors
+        errors = angular.element('<div bs-input-errors></div>')
+        errors.attr('name', name)
+        errors = $compile(errors)(scope)
+        element.append(errors)
       return
 
     return
   ]
 
-  preLink = (scope, element, attrs, ctrls) ->
-    form  = ctrls[0]
-    ctrl  = ctrls[1]
-    model = attrs.ngModel || ""
-
-    attrs.$set 'name', model.split('.')[1] unless attrs.name
-    attrs.$set 'id',   "#{form.$name}_#{model.replace('.', '_')}" unless attrs.id
-
-    ctrl.form  = form
-    ctrl.input = form[attrs.name]
-
+  postLink = (scope, element, attrs, ctrl) ->
+    element.addClass('form-group')
+    ctrl.controlLabel(attrs.label) if attrs.label
     return
 
-  postLink = (scope, element, attrs, ctrls) ->
-    form    = ctrls[0]
-    options = scope.$eval(attrs.bsFormGroup) || {}
+  {
+    restrict:   'AC'
+    scope:      true
+    controller: controller
+    link:       postLink
+  }
 
-    element.addClass('form-control')
-    element.wrap('<div class="form-group"></div>')
 
-    wrap  = element.parent()
-    wrap.addClass(options.wrapClass) if options.wrapClass
+mod.directive 'ngModel', ->
 
-    if options.prefix || options.prefixIcon || options.suffix || options.suffixIcon
-      element.wrap(angular.element('<div class="input-group"></div>'))
-      group = element.parent()
-      if options.prefix || options.prefixIcon
-        group.prepend inputAddon(options.prefix, options.prefixIcon)
-      if options.suffix || options.suffixIcon
-        group.append inputAddon(options.suffix, options.suffixIcon)
+  titleize = (name) ->
+    words = for word in name.replace(/([A-Z])/g, ' $1').split(' ')
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    words.join(' ')
 
-    unless options.nolabel
-      label = angular.element('<label class="control-label"></label>')
-      label.text(options.label || titleize(attrs.name))
-      label.attr('for', attrs.id)
-      label.addClass(options.labelClass) if options.labelClass
-      wrap.prepend(label)
+  postLink = (scope, element, attrs, formGroup) ->
 
-    unless options.noerrors
-      errors = angular.element('<div class="control-errors" bs-input-errors ng-show="hasError()"></div>')
-      errors.attr('name', attrs.name)
-      errors = $compile(errors)(scope)
-      wrap.append(errors)
+    # Automatically set name and ID
+    model = attrs.ngModel || ""
+    attrs.$set 'name', model.split('.')[1] unless attrs.name
+    attrs.$set 'id',   "#{model.replace('.', '_')}" unless attrs.id
+
+    # Stop here if not wrapped in a bs:form-group
+    return unless formGroup
+
+    # Make this input a form-control
+    unless attrs.type == 'radio' || attrs.type == 'checkbox'
+      element.addClass('form-control')
+
+    # Update label and set errors
+    formGroup.controlLabel(titleize(attrs.name), attrs.id)
+    formGroup.inputErrors(attrs.name)
 
     return
 
   {
-    restrict:   'A'
-    require:    ['^form', 'bsFormGroup']
-    controller: controller
-    scope:      true
-    link:
-      pre: preLink
-      post: postLink
+    restrict:  'A'
+    require:   '^?formGroup'
+    link:      postLink
   }

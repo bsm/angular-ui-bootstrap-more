@@ -1,15 +1,16 @@
-fs     = require 'fs'
-del    = require 'del'
-path   = require 'path'
-gulp   = require 'gulp'
-gulpif = require 'gulp-if'
-gutil  = require 'gulp-util'
-rename = require 'gulp-rename'
-coffee = require 'gulp-coffee'
-uglify = require 'gulp-uglify'
-concat = require 'gulp-concat'
-merge  = require 'merge-stream'
-karma  = require 'gulp-karma'
+fs      = require 'fs'
+del     = require 'del'
+path    = require 'path'
+gulp    = require 'gulp'
+gulpif  = require 'gulp-if'
+gutil   = require 'gulp-util'
+rename  = require 'gulp-rename'
+coffee  = require 'gulp-coffee'
+uglify  = require 'gulp-uglify'
+concat  = require 'gulp-concat'
+merge   = require 'merge-stream'
+plumber = require 'gulp-plumber'
+karma   = require 'gulp-karma'
 
 coffeelint    = require 'gulp-coffeelint'
 ngAnnotate    = require 'gulp-ng-annotate'
@@ -34,6 +35,7 @@ gulp.task 'dist', ['dist:clean'], ->
       "#{srcRoot}/#{name}*/**"
       "!#{srcRoot}/**/*_test.*"
     ]
+      .pipe plumber()
       .pipe gulpif(/[.]coffee$/, coffeelint())
       .pipe gulpif(/[.]coffee$/, coffeelint.reporter().on('error', gutil.log))
       .pipe gulpif(/[.]coffee$/, coffee())

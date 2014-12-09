@@ -13,37 +13,39 @@ mod.provider 'bsInputErrorsConfig', ->
     max       : 'must not be over {{max}}'
     invalid   : 'is invalid'
 
-  @$get = => {messages: @messages}
+  @$get = =>
+    {messages: @messages}
+
   return
 
 mod.directive 'bsInputErrors', ($interpolate, bsInputErrorsConfig) ->
-  onLink = (scope, element, attrs, ctrls) ->
-    # Move help blocks after element
-    element.after(element[0].children[0])
+  postLink = (scope, element, attrs, form) ->
 
-    # Assign form & input
-    scope.input = ctrls[0]
-    scope.form  = ctrls[1]
+    # Assign input
+    name = $interpolate(attrs.name || '', false)(scope)
+    scope.input = form[name]
 
     # Compile messages
     messages = angular.copy(bsInputErrorsConfig.messages)
-    angular.extend messages, scope.$eval(attrs.bsInputErrors)
+    angular.extend messages, scope.$eval(attrs.messages) if attrs.messages
 
     # Assign/interpolate messages
-    vals =
-      min: attrs.min
-      max: attrs.max
-      minlength: attrs.minlength || attrs.ngMinlength
-      maxlength: attrs.maxlength || attrs.ngMaxlength
+    input = element[0].parentNode?.querySelector("[name='#{name}']")
+    input = angular.element(input) if input?
+    vals  =
+      min: attrs.min || input?.attr('min')
+      max: attrs.max || input?.attr('max')
+      minlength: attrs.minlength || input?.attr('minlength') || input?.attr('ng-minlength')
+      maxlength: attrs.maxlength || input?.attr('maxlength') || input?.attr('ng-maxlength')
     scope.messages = {}
     scope.messages[kind] = $interpolate(msg)(vals) for kind, msg of messages
 
     return
 
   {
-    restrict: 'A'
-    require:  ['ngModel', '^?form']
-    link:     onLink
-    scope:    {}
+    restrict:   'AE'
+    require:    '^form'
+    link:       postLink
+    scope:      {}
     templateUrl: 'template/ui-bootstrap-more/input-errors/input-errors.html'
   }

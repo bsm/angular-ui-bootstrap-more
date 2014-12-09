@@ -12,47 +12,57 @@
   <div class="container">
     <div class="page-header"><h1>Form Demo</h1></div>
     <div class="row">
-      <form name="form" class="col-sm-6" ng-submit="onSubmit(form)" novalidate>
+      <form name="form" class="col-sm-8" ng-submit="onSubmit(form)" novalidate>
 
         <div class="row">
-          <bs:form-group model="movie.title" class="col-sm-8">
-          </bs:form-group>
-          <bs:form-group model="movie.genre" class="col-sm-4">
-          </bs:form-group>
+          <input type="text" required
+            ng-model="movie.title"
+            ng-minlength="2"
+            ng-maxlength="50"
+            bs-form-group="{wrapClass: 'col-sm-8 has-feedback', label: 'Movie title', labelClass: 'test'}" />
+
+          <select required
+            ng-model="movie.genre"
+            ng-options="genre.name as genre.label for genre in genres"
+            bs-form-group="{wrapClass: 'col-sm-4'}"><option value="">-- Please select --</option></select>
         </div>
 
-        <bs:input
-          type="text"
-          required
-          pattern="^[a-z]+$"
-          ng-model="model.name"
-          ng-minlength="3"
-          ng-maxlength="30"
-          messages="{pattern: 'must only contain lowercase characters'}"></bs:input>
+        <div class="row">
+          <input type="text" ng-model="movie.director" bs-form-group="{wrapClass: 'col-sm-4'}" />
+          <input type="text" ng-model="movie.writer" bs-form-group="{wrapClass: 'col-sm-4'}" />
+          <input
+            type="number"
+            ng-model="movie.budget"
+            required
+            min="1"
+            max="200000000"
+            bs-form-group="{wrapClass: 'col-sm-4', prefixIcon: 'fa fa-dollar'}" />
+        </div>
 
-        <bs:input
-          type="email"
-          required
-          ng-model="model.email"></bs:input>
+        <input type="url" ng-model="movie.url" required bs-form-group="{label: 'Website'}" />
+        <input type="url" ng-model="movie.trailer" bs-form-group />
+        <textarea ng-model="movie.review" rows="8" required bs-form-group></textarea>
 
-        <bs:input
-          type="number"
-          min="12" max="99"
-          label="Your age"
-          ng-model="model.age"></bs:input>
-
-        <bs:select
-          ng-options="colour for colour in colours"
-          ng-model="model.colour"><option value="">-- choose colour --</option></bs:select>
+        <div class="form-group">
+          <label class="radio-inline">
+            <input type="radio" ng-model="movie.rating" value="terrible" /> Terrible
+          </label>
+          <label class="radio-inline">
+            <input type="radio" ng-model="movie.rating" value="watchable" /> Watchable
+          </label>
+          <label class="radio-inline">
+            <input type="radio" ng-model="movie.rating" value="best" /> Five Stars!
+          </label>
+        </div>
 
         <bs:submit></bs:submit>
+
       </form>
 
-      <div class="col-sm-6"><pre>{{model | json}}</pre></div>
+      <div class="col-sm-4"><pre>{{movie | json}}</pre></div>
     </div>
   </div>
   <script src="./node_modules/angular/angular.js"></script>
-  <script src="./node_modules/angular-messages/angular-messages.js"></script>
   <script src="./dist/ui-bsm-input-errors.js"></script>
   <script src="./dist/ui-bsm-form-builder.js"></script>
   <script>
@@ -61,8 +71,13 @@
       'ui.bootstrap.more.form-builder',
     ])
       .controller('DemoCtrl', ["$scope", function($scope) {
-        $scope.model = {};
-        $scope.colours = ['black', 'white', 'red', 'green', 'blue'];
+        $scope.movie = {rating: 'terrible'};
+        $scope.genres = [
+          {name: "action", label: "Action" },
+          {name: "comedy", label: "Comedy" },
+          {name: "horror", label: "Horror" },
+          {name: "romance", label: "Romance" }
+        ];
 
         $scope.onSubmit = function(form) {
           if (form.$invalid) return;
@@ -73,78 +88,3 @@
 </body>
 </html>
 
-<!--
-
-    <div class="form-group">
-        <div class="row">
-            <div class="col-sm-8">
-                <label class="control-label">Movie title</label>
-                <input type="text" class="form-control" name="title" />
-            </div>
-
-            <div class="col-sm-4 selectContainer">
-                <label class="control-label">Genre</label>
-                <select class="form-control" name="genre">
-                    <option value="">Choose a genre</option>
-                    <option value="action">Action</option>
-                    <option value="comedy">Comedy</option>
-                    <option value="horror">Horror</option>
-                    <option value="romance">Romance</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <div class="row">
-            <div class="col-sm-4">
-                <label class="control-label">Director</label>
-                <input type="text" class="form-control" name="director" />
-            </div>
-
-            <div class="col-sm-4">
-                <label class="control-label">Writer</label>
-                <input type="text" class="form-control" name="writer" />
-            </div>
-
-            <div class="col-sm-4">
-                <label class="control-label">Producer</label>
-                <input type="text" class="form-control" name="producer" />
-            </div>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <div class="row">
-            <div class="col-sm-6">
-                <label class="control-label">Website</label>
-                <input type="text" class="form-control" name="website" />
-            </div>
-
-            <div class="col-sm-6">
-                <label class="control-label">Youtube trailer</label>
-                <input type="text" class="form-control" name="trailer" />
-            </div>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label class="control-label">Review</label>
-        <textarea class="form-control" name="review" rows="8"></textarea>
-    </div>
-
-    <div class="form-group">
-        <label class="control-label">Rating</label>
-        <div>
-            <label class="radio-inline">
-                <input type="radio" name="rating" value="terrible" /> Terrible
-            </label>
-            <label class="radio-inline">
-                <input type="radio" name="rating" value="watchable" /> Watchable
-            </label>
-            <label class="radio-inline">
-                <input type="radio" name="rating" value="best" /> Best ever
-            </label>
-        </div>
-    </div>
-  -->

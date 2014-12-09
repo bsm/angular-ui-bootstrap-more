@@ -1,76 +1,5 @@
 mod = angular.module 'ui.bootstrap.more.form-builder', []
 
-mod.provider 'bsFormBuilderConfig', ->
-  @templates =
-    formGroup  : '<div class="form-group"></div>'
-    inputGroup : '<div class="input-group"></div>'
-    inputAddon : '<div class="input-group-addon"></div>'
-    label      : '<label class="control-label"></label>'
-    input      : '<input class="form-control" />'
-    select     : '<select class="form-control"></select>'
-
-  @$get = =>
-    {templates: @templates}
-  return
-
-mod.factory 'bsFormBuilder', ($compile, bsFormBuilderConfig) ->
-  titleize = (name) ->
-    words = for word in name.replace(/([A-Z])/g, ' $1').split(' ')
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    words.join(' ')
-  makeInputGroup = (content, icon) ->
-    content = "<i class=\"#{icon}\" />" if icon?
-    addon = angular.element(bsFormBuilderConfig.templates.inputAddon)
-    addon.append angular.element(content)
-    group = angular.element(bsFormBuilderConfig.templates.inputGroup)
-    group.append addon
-    group
-
-  (scope, element, input, attrs, formCtrl) ->
-    name = attrs.ngModel.split('.')[1]
-    attrs.$set 'name', attrs.name || name
-    attrs.$set 'id', attrs.id || "#{formCtrl.$name}_#{attrs.ngModel.replace('.', '_')}"
-    attrs.$set 'bsInputErrors', attrs.messages || '{}'
-
-    # Build elements
-    group = input
-    wrap  = angular.element(bsFormBuilderConfig.templates.formGroup)
-    unless attrs.nolabel?
-      label = angular.element(bsFormBuilderConfig.templates.label)
-      label.attr 'for', attrs.id
-      label.html attrs.label || titleize(name)
-    if attrs.prefix? || attrs.prefixIcon?
-      group = makeInputGroup(attrs.prefix, attrs.prefixIcon)
-      group.append(input)
-    else if attrs.suffix? || attrs.suffixIcon?
-      group = makeInputGroup(attrs.suffix, attrs.suffixIcon)
-      group.prepend(input)
-
-    # Unset helper attributes
-    attrs.$set 'messages', null
-    attrs.$set 'class', null
-    attrs.$set 'label', null
-
-    # Copy input attributes
-    for attr in element[0].attributes
-      input.attr(attr.name, attr.value || ' ')
-
-    # Watch field for signs of invalidness
-    scope.$watch ->
-      field = formCtrl[name]
-      field? && field.$invalid && (formCtrl.$submitted || field.$touched || field.$dirty)
-    , (invalid) ->
-      wrap.toggleClass('has-error', invalid)
-
-    # Assemble containers & compile
-    element.after(wrap)
-    element.remove()
-    wrap.append(label) if label?
-    wrap.append(group)
-    $compile(wrap.contents())(scope)
-
-    name
-
 # Submit directive
 mod.directive 'bsSubmit', ($window) ->
   onLink = (scope, element, attrs) ->
@@ -88,75 +17,93 @@ mod.directive 'bsSubmit', ($window) ->
     templateUrl: 'template/ui-bootstrap-more/form-builder/submit.html'
   }
 
-# Input directive
-mod.directive 'bsInput', (bsFormBuilderConfig, bsFormBuilder) ->
-  {
-    restrict: 'AE'
-    require:  '^form'
-    link:
-      pre: (scope, element, attrs, ctrl) ->
-        attrs.type || attrs.$set 'type', 'text'
-        scope = scope.$new()
-        input = angular.element(bsFormBuilderConfig.templates.input)
-        bsFormBuilder(scope, element, input, attrs, ctrl)
-        return
-  }
-
-# Select directive
-mod.directive 'bsSelect', (bsFormBuilderConfig, bsFormBuilder) ->
-  {
-    restrict: 'AE'
-    require:  '^form'
-    link:
-      pre: (scope, element, attrs, ctrl) ->
-        scope = scope.$new()
-        input = angular.element(bsFormBuilderConfig.templates.select)
-        input.append(element.contents())
-        bsFormBuilder(scope, element, input, attrs, ctrl)
-        return
-  }
-
-mod.directive 'bsFormGroup', ->
+mod.directive 'bsFormGroup', ($compile) ->
   titleize = (name) ->
     words = for word in name.replace(/([A-Z])/g, ' $1').split(' ')
       word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     words.join(' ')
 
-  controller = ["$element", "$attrs", ($element, $attrs) ->
-    unless $attrs.model?
-       throw new Error("form-group element has no model attribute")
+  inputAddon = (content, icon) ->
+    content = "<i class=\"#{icon}\" />" if icon?
+    angular.element('<div class="input-group-addon"></div>')
+      .append(angular.element(content))
 
-    @$model = $attrs.model
-    [@$modelName, @$attrName, ...] = @$model.split('.')
-    @$name  = $attrs.name || @$attrName
-    @$for   = $attrs.for || @$model.replace('.', '_')
+  controller = ['$element', '$scope', '$attrs', ($element, $scope, $attrs) ->
+    @form = @input = undefined
+
+    formGroup = ->
+      node = $element.parent()
+      node = node.parent() while node.length && !node.hasClass('form-group')
+      node
+    isTouched = =>
+      @form && @input && (@form.$submitted || @input.$touched)
+    $scope.hasSuccess = =>
+      isTouched() && @input.$dirty && @input.$valid
+    $scope.hasError = =>
+      isTouched() && @input.$invalid
+
+    $scope.$watch $scope.hasError, (value) ->
+      formGroup().toggleClass('has-error', value)
+      return
+    $scope.$watch $scope.hasSuccess, (value) ->
+      formGroup().toggleClass('has-success', value)
+      return
+
     return
   ]
 
-  {
-    restrict:   'AE'
-    require:    ['^form', 'bsFormGroup']
-    scope:      {}
-    tranclude:  true
-    controller: controller
-    link: (scope, element, attrs, ctrls) ->
-      form = ctrls[0]
-      ctrl = ctrls[1]
+  preLink = (scope, element, attrs, ctrls) ->
+    form  = ctrls[0]
+    ctrl  = ctrls[1]
+    model = attrs.ngModel || ""
 
-      # Store form reference
-      ctrl.$form = form
+    attrs.$set 'name', model.split('.')[1] unless attrs.name
+    attrs.$set 'id',   "#{form.$name}_#{model.replace('.', '_')}" unless attrs.id
 
-      # Inherit model from parent scope
-      scope[ctrl.$modelName] = scope.$parent[ctrl.$modelName] ? {}
+    ctrl.form  = form
+    ctrl.input = form[attrs.name]
 
-      # Label
+    return
+
+  postLink = (scope, element, attrs, ctrls) ->
+    form    = ctrls[0]
+    options = scope.$eval(attrs.bsFormGroup) || {}
+
+    element.addClass('form-control')
+    element.wrap('<div class="form-group"></div>')
+
+    wrap  = element.parent()
+    wrap.addClass(options.wrapClass) if options.wrapClass
+
+    if options.prefix || options.prefixIcon || options.suffix || options.suffixIcon
+      element.wrap(angular.element('<div class="input-group"></div>'))
+      group = element.parent()
+      if options.prefix || options.prefixIcon
+        group.prepend inputAddon(options.prefix, options.prefixIcon)
+      if options.suffix || options.suffixIcon
+        group.append inputAddon(options.suffix, options.suffixIcon)
+
+    unless options.nolabel
       label = angular.element('<label class="control-label"></label>')
-      label.text(attrs.label || titleize(ctrl.$name))
-      label.attr('for', ctrl.$for)
-      label.addClass(attrs.labelClass) if attrs.labelClass
+      label.text(options.label || titleize(attrs.name))
+      label.attr('for', attrs.id)
+      label.addClass(options.labelClass) if options.labelClass
+      wrap.prepend(label)
 
-      element.addClass('form-group')
-      element.prepend(label)
+    unless options.noerrors
+      errors = angular.element('<div class="control-errors" bs-input-errors ng-show="hasError()"></div>')
+      errors.attr('name', attrs.name)
+      errors = $compile(errors)(scope)
+      wrap.append(errors)
 
-      return
+    return
+
+  {
+    restrict:   'A'
+    require:    ['^form', 'bsFormGroup']
+    controller: controller
+    scope:      true
+    link:
+      pre: preLink
+      post: postLink
   }

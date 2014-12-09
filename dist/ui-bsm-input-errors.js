@@ -26,19 +26,24 @@
   });
 
   mod.directive('bsInputErrors', ["$interpolate", "bsInputErrorsConfig", function($interpolate, bsInputErrorsConfig) {
-    var onLink;
-    onLink = function(scope, element, attrs, ctrls) {
-      var kind, messages, msg, vals;
-      element.after(element[0].children[0]);
-      scope.input = ctrls[0];
-      scope.form = ctrls[1];
+    var postLink;
+    postLink = function(scope, element, attrs, form) {
+      var input, kind, messages, msg, name, vals, _ref;
+      name = $interpolate(attrs.name || '', false)(scope);
+      scope.input = form[name];
       messages = angular.copy(bsInputErrorsConfig.messages);
-      angular.extend(messages, scope.$eval(attrs.bsInputErrors));
+      if (attrs.messages) {
+        angular.extend(messages, scope.$eval(attrs.messages));
+      }
+      input = (_ref = element[0].parentNode) != null ? _ref.querySelector("[name='" + name + "']") : void 0;
+      if (input != null) {
+        input = angular.element(input);
+      }
       vals = {
-        min: attrs.min,
-        max: attrs.max,
-        minlength: attrs.minlength || attrs.ngMinlength,
-        maxlength: attrs.maxlength || attrs.ngMaxlength
+        min: attrs.min || (input != null ? input.attr('min') : void 0),
+        max: attrs.max || (input != null ? input.attr('max') : void 0),
+        minlength: attrs.minlength || (input != null ? input.attr('minlength') : void 0) || (input != null ? input.attr('ng-minlength') : void 0),
+        maxlength: attrs.maxlength || (input != null ? input.attr('maxlength') : void 0) || (input != null ? input.attr('ng-maxlength') : void 0)
       };
       scope.messages = {};
       for (kind in messages) {
@@ -47,9 +52,9 @@
       }
     };
     return {
-      restrict: 'A',
-      require: ['ngModel', '^?form'],
-      link: onLink,
+      restrict: 'AE',
+      require: '^form',
+      link: postLink,
       scope: {},
       templateUrl: 'template/ui-bootstrap-more/input-errors/input-errors.html'
     };
@@ -57,4 +62,4 @@
 
 }).call(this);
 
-angular.module("ui.bootstrap.more.input-errors").run(["$templateCache", function($templateCache) {$templateCache.put("template/ui-bootstrap-more/input-errors/input-errors.html","<div class=\"input-errors\" ng-show=\"(form.$submitted || input.$dirty || input.$touched) && input.$invalid\">\n  <p ng-repeat=\"(kind, _) in input.$error\" ng-show=\"$first\" class=\"help-block\" ng-bind=\"messages[kind]\"></p>\n</div>\n");}]);
+angular.module("ui.bootstrap.more.input-errors").run(["$templateCache", function($templateCache) {$templateCache.put("template/ui-bootstrap-more/input-errors/input-errors.html","<p ng-repeat=\"(kind, _) in input.$error\" ng-show=\"$first\" class=\"help-block\" ng-bind=\"messages[kind]\"></p>\n");}]);

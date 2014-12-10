@@ -60,6 +60,12 @@
           <input type="url" ng-model="movie.trailer" />
         </div>
 
+        <!-- Range -->
+        <div class="form-group" nolabel>
+          <label>Rating (<span ng-bind="movie.rating"></span>)</label>
+          <input type="range" ng-model="movie.rating" required min="0" max="5" step="0.1" nocontrol>
+        </div>
+
         <!-- Textarea -->
         <div class="form-group">
           <textarea ng-model="movie.review" rows="8" required></textarea>
@@ -97,7 +103,7 @@
       'ui.bootstrap.more.form-builder',
     ])
       .controller('DemoCtrl', ["$scope", function($scope) {
-        $scope.movie = {};
+        $scope.movie = {rating: 2.5};
         $scope.genres = [
           {name: "action", label: "Action" },
           {name: "comedy", label: "Comedy" },

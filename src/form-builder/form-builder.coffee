@@ -115,7 +115,7 @@ mod.directive 'ngModel', ->
     return unless formGroup
 
     # Make this input a form-control
-    unless attrs.type == 'radio' || attrs.type == 'checkbox'
+    unless attrs.nocontrol? || attrs.type == 'radio' || attrs.type == 'checkbox'
       element.addClass('form-control')
 
     # Update label and set errors

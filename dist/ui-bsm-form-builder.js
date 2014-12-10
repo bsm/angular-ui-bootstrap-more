@@ -150,7 +150,7 @@
       if (!formGroup) {
         return;
       }
-      if (!(attrs.type === 'radio' || attrs.type === 'checkbox')) {
+      if (!((attrs.nocontrol != null) || attrs.type === 'radio' || attrs.type === 'checkbox')) {
         element.addClass('form-control');
       }
       formGroup.controlLabel(titleize(attrs.name), attrs.id);

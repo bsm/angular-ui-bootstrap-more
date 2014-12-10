@@ -3,13 +3,13 @@
 
   mod = angular.module('ui.bootstrap.more.form-builder', []);
 
-  mod.factory('bsInputAddonBuilder', function() {
+  mod.factory('bsInputAddonHook', function() {
     return function(element, position, content, icon) {
       var addon;
-      if (icon != null) {
-        content = "<i class=\"" + icon + "\" />";
+      if (icon) {
+        content = angular.element("<i class=\"" + icon + "\" />");
       }
-      addon = angular.element('<div class="input-group-addon"></div>').append(angular.element(content));
+      addon = angular.element('<div class="input-group-addon"></div>').append(content);
       return element.wrap('<div class="input-group"></div>').parent()[position](addon);
     };
   });
@@ -33,42 +33,42 @@
     };
   }]);
 
-  mod.directive('prefixIcon', ["bsInputAddonBuilder", function(bsInputAddonBuilder) {
+  mod.directive('prefixIcon', ["bsInputAddonHook", function(bsInputAddonHook) {
     return {
       restrict: 'A',
       require: 'ngModel',
       link: function(scope, element, attrs) {
-        return bsInputAddonBuilder(element, 'prepend', "", attrs.prefixIcon);
+        return bsInputAddonHook(element, 'prepend', "", attrs.prefixIcon);
       }
     };
   }]);
 
-  mod.directive('prefix', ["bsInputAddonBuilder", function(bsInputAddonBuilder) {
+  mod.directive('prefix', ["bsInputAddonHook", function(bsInputAddonHook) {
     return {
       restrict: 'A',
       require: 'ngModel',
       link: function(scope, element, attrs) {
-        return bsInputAddonBuilder(element, 'prepend', attrs.prefix, "");
+        return bsInputAddonHook(element, 'prepend', attrs.prefix, null);
       }
     };
   }]);
 
-  mod.directive('suffixIcon', ["bsInputAddonBuilder", function(bsInputAddonBuilder) {
+  mod.directive('suffixIcon', ["bsInputAddonHook", function(bsInputAddonHook) {
     return {
       restrict: 'A',
       require: 'ngModel',
       link: function(scope, element, attrs) {
-        return bsInputAddonBuilder(element, 'append', "", attrs.suffixIcon);
+        return bsInputAddonHook(element, 'append', "", attrs.suffixIcon);
       }
     };
   }]);
 
-  mod.directive('suffix', ["bsInputAddonBuilder", function(bsInputAddonBuilder) {
+  mod.directive('suffix', ["bsInputAddonHook", function(bsInputAddonHook) {
     return {
       restrict: 'A',
       require: 'ngModel',
       link: function(scope, element, attrs) {
-        return bsInputAddonBuilder(element, 'append', attrs.suffix, "");
+        return bsInputAddonHook(element, 'append', attrs.suffix, null);
       }
     };
   }]);
@@ -80,7 +80,7 @@
         var errors, label;
         label = errors = void 0;
         this.controlLabel = function(caption, target) {
-          if (attrs.nolabel) {
+          if (attrs.nolabel != null) {
             return;
           }
           if (!label) {
@@ -96,7 +96,7 @@
           }
         };
         this.inputErrors = function(name) {
-          if (attrs.noerrors) {
+          if (attrs.noerrors != null) {
             return;
           }
           if (!errors) {

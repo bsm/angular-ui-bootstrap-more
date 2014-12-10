@@ -1,10 +1,9 @@
 mod = angular.module 'ui.bootstrap.more.form-builder', []
 
-mod.factory 'bsInputAddonBuilder', ->
+mod.factory 'bsInputAddonHook', ->
   (element, position, content, icon) ->
-    content = "<i class=\"#{icon}\" />" if icon?
-    addon   = angular.element('<div class="input-group-addon"></div>')
-      .append(angular.element(content))
+    content = angular.element("<i class=\"#{icon}\" />") if icon
+    addon   = angular.element('<div class="input-group-addon"></div>').append(content)
     element.wrap('<div class="input-group"></div>').parent()[position](addon)
 
 mod.directive 'bsSubmit', ($window) ->
@@ -23,33 +22,33 @@ mod.directive 'bsSubmit', ($window) ->
     templateUrl: 'template/ui-bootstrap-more/form-builder/submit.html'
   }
 
-mod.directive 'prefixIcon', (bsInputAddonBuilder) ->
+mod.directive 'prefixIcon', (bsInputAddonHook) ->
   {
     restrict:  'A'
     require:   'ngModel'
     link:      (scope, element, attrs) ->
-      bsInputAddonBuilder(element, 'prepend', "", attrs.prefixIcon)
+      bsInputAddonHook(element, 'prepend', "", attrs.prefixIcon)
   }
 
-mod.directive 'prefix', (bsInputAddonBuilder) ->
+mod.directive 'prefix', (bsInputAddonHook) ->
   {
     restrict: 'A'
     require:   'ngModel'
-    link:     (scope, element, attrs) -> bsInputAddonBuilder(element, 'prepend', attrs.prefix, "")
+    link:     (scope, element, attrs) -> bsInputAddonHook(element, 'prepend', attrs.prefix, null)
   }
 
-mod.directive 'suffixIcon', (bsInputAddonBuilder) ->
+mod.directive 'suffixIcon', (bsInputAddonHook) ->
   {
     restrict:  'A'
     require:   'ngModel'
-    link:      (scope, element, attrs) -> bsInputAddonBuilder(element, 'append', "", attrs.suffixIcon)
+    link:      (scope, element, attrs) -> bsInputAddonHook(element, 'append', "", attrs.suffixIcon)
   }
 
-mod.directive 'suffix', (bsInputAddonBuilder) ->
+mod.directive 'suffix', (bsInputAddonHook) ->
   {
     restrict: 'A'
     require:  'ngModel'
-    link:     (scope, element, attrs) -> bsInputAddonBuilder(element, 'append', attrs.suffix, "")
+    link:     (scope, element, attrs) -> bsInputAddonHook(element, 'append', attrs.suffix, null)
   }
 
 mod.directive 'formGroup', ($compile) ->
@@ -59,7 +58,7 @@ mod.directive 'formGroup', ($compile) ->
 
     # Insert control label
     @controlLabel = (caption, target) ->
-      return if attrs.nolabel
+      return if attrs.nolabel?
 
       unless label
         label = angular.element('<label class="control-label"></label>')
@@ -73,7 +72,8 @@ mod.directive 'formGroup', ($compile) ->
 
     # Insert input errors
     @inputErrors = (name) ->
-      return if attrs.noerrors
+      return if attrs.noerrors?
+
       unless errors
         errors = angular.element('<div bs-input-errors></div>')
         errors.attr('name', name)

@@ -38,6 +38,7 @@
       var formGroup, input, kind, limits, messages, msg, name, touched, _ref;
       name = $interpolate(attrs.name || '', false)(scope);
       scope.input = form[name];
+      scope.input.errorMessages = {};
       messages = angular.copy(bsInputErrorsConfig.messages);
       if (attrs.messages) {
         angular.extend(messages, scope.$eval(attrs.messages));
@@ -86,4 +87,4 @@
 
 }).call(this);
 
-angular.module("ui.bootstrap.more.input-errors").run(["$templateCache", function($templateCache) {$templateCache.put("template/ui-bootstrap-more/input-errors/input-errors.html","<div ng-show=\"hasError()\">\n  <p ng-repeat=\"(kind, message) in input.$error\" ng-show=\"$first\" class=\"help-block\" ng-bind=\"messages[kind] || message\"></p>\n</div>\n");}]);
+angular.module("ui.bootstrap.more.input-errors").run(["$templateCache", function($templateCache) {$templateCache.put("template/ui-bootstrap-more/input-errors/input-errors.html","<div ng-show=\"hasError()\">\n  <p ng-repeat=\"(kind, message) in input.$error\" ng-show=\"$first\" class=\"help-block\" ng-bind=\"input.errorMessages[kind] || messages[kind]\"></p>\n</div>\n");}]);

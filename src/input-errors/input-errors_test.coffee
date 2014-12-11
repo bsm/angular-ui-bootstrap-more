@@ -99,10 +99,18 @@ describe 'directive: bsInputErrors', ->
     scope.form.number.$setViewValue('150')
     expect(errorsOn('number').length).toEqual(0)
 
-  it 'should allow custom message injection', ->
-    scope.form.number.$setViewValue('150')
+  it 'should allow custom error message injection', ->
+    scope.form.number.errorMessages['number'] = 'bad number'
+    scope.form.number.errorMessages['custom'] = 'not a good number'
+
     scope.$apply ->
-      scope.form.number.$error.backend = "not a good number"
+      scope.form.number.$setViewValue('NOTNUM')
+    expect(errorsOn('number').length).toEqual(1)
+    expect(errorsOn('number').text()).toEqual('bad number')
+
+    scope.$apply ->
+      scope.form.number.$setViewValue('150')
+      scope.form.number.$error.custom = true
     expect(errorsOn('number').length).toEqual(1)
     expect(errorsOn('number').text()).toEqual('not a good number')
 

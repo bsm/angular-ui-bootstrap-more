@@ -25,6 +25,7 @@ mod.directive 'bsInputErrors', ($interpolate, bsInputErrorsConfig) ->
     # Assign input
     name = $interpolate(attrs.name || '', false)(scope)
     scope.input = form[name]
+    scope.input.errorMessages = {}
 
     # Compile messages
     messages = angular.copy(bsInputErrorsConfig.messages)
@@ -56,7 +57,6 @@ mod.directive 'bsInputErrors', ($interpolate, bsInputErrorsConfig) ->
         formGroup.toggleClass('has-error', value)
       scope.$watch scope.hasSuccess, (value) ->
         formGroup.toggleClass('has-success', value)
-
     return
 
   {

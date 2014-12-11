@@ -112,7 +112,7 @@ mod.directive 'ngModel', ->
     attrs.$set 'id',   "#{model.replace('.', '_')}" unless attrs.id
 
     # Stop here if not wrapped in a .form-group
-    return unless formGroup && attr.name
+    return unless formGroup && attrs.name
 
     # Make this input a form-control
     unless attrs.nocontrol? || attrs.type == 'radio' || attrs.type == 'checkbox'

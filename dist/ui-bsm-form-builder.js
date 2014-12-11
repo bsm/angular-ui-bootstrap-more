@@ -123,7 +123,7 @@
   }]);
 
   mod.directive('ngModel', function() {
-    var postLink, titleize;
+    var preLink, titleize;
     titleize = function(name) {
       var word, words;
       words = (function() {
@@ -138,7 +138,7 @@
       })();
       return words.join(' ');
     };
-    postLink = function(scope, element, attrs, formGroup) {
+    preLink = function(scope, element, attrs, formGroup) {
       var model;
       model = attrs.ngModel || "";
       if (!attrs.name) {
@@ -147,7 +147,7 @@
       if (!attrs.id) {
         attrs.$set('id', "" + (model.replace('.', '_')));
       }
-      if (!formGroup) {
+      if (!(formGroup && attrs.name)) {
         return;
       }
       if (!((attrs.nocontrol != null) || attrs.type === 'radio' || attrs.type === 'checkbox')) {
@@ -159,7 +159,9 @@
     return {
       restrict: 'A',
       require: '^?formGroup',
-      link: postLink
+      link: {
+        pre: preLink
+      }
     };
   });
 

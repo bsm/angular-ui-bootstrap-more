@@ -11,7 +11,6 @@ mod.provider 'bsInputErrorsConfig', ->
     url       : 'is not a valid URL'
     min       : 'must be at least {{min}}'
     max       : 'must not be over {{max}}'
-    invalid   : 'is invalid'
 
   @$get = =>
     {messages: @messages}
@@ -39,6 +38,7 @@ mod.directive 'bsInputErrors', ($interpolate, bsInputErrorsConfig) ->
       max: attrs.max || input?.attr('max')
       minlength: attrs.minlength || input?.attr('minlength') || input?.attr('ng-minlength')
       maxlength: attrs.maxlength || input?.attr('maxlength') || input?.attr('ng-maxlength')
+
     scope.messages = {}
     scope.messages[kind] = $interpolate(msg)(limits) for kind, msg of messages
 

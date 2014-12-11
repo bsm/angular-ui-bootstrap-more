@@ -13,8 +13,7 @@
       email: 'is not a valid email address',
       url: 'is not a valid URL',
       min: 'must be at least {{min}}',
-      max: 'must not be over {{max}}',
-      invalid: 'is invalid'
+      max: 'must not be over {{max}}'
     };
     this.$get = (function(_this) {
       return function() {
@@ -87,4 +86,4 @@
 
 }).call(this);
 
-angular.module("ui.bootstrap.more.input-errors").run(["$templateCache", function($templateCache) {$templateCache.put("template/ui-bootstrap-more/input-errors/input-errors.html","<div ng-show=\"hasError()\">\n  <p ng-repeat=\"(kind, _) in input.$error\" ng-show=\"$first\" class=\"help-block\" ng-bind=\"messages[kind]\"></p>\n</div>\n");}]);
+angular.module("ui.bootstrap.more.input-errors").run(["$templateCache", function($templateCache) {$templateCache.put("template/ui-bootstrap-more/input-errors/input-errors.html","<div ng-show=\"hasError()\">\n  <p ng-repeat=\"(kind, message) in input.$error\" ng-show=\"$first\" class=\"help-block\" ng-bind=\"messages[kind] || message\"></p>\n</div>\n");}]);

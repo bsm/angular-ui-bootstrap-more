@@ -8,7 +8,7 @@ describe 'provider: bsInputErrorsConfig', ->
 
   it 'should have config', ->
     expect(subject.messages).toBeDefined()
-    expect(Object.keys(subject.messages).length).toEqual(10)
+    expect(Object.keys(subject.messages).length).toEqual(9)
 
 describe 'directive: bsInputErrors', ->
   scope = element = null
@@ -98,6 +98,13 @@ describe 'directive: bsInputErrors', ->
 
     scope.form.number.$setViewValue('150')
     expect(errorsOn('number').length).toEqual(0)
+
+  it 'should allow custom message injection', ->
+    scope.form.number.$setViewValue('150')
+    scope.$apply ->
+      scope.form.number.$error.backend = "not a good number"
+    expect(errorsOn('number').length).toEqual(1)
+    expect(errorsOn('number').text()).toEqual('not a good number')
 
   it 'should toggle has-success/error', ->
     classes = -> select('.form-group')[0].getAttribute('class')

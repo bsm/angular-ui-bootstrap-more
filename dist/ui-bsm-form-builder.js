@@ -102,6 +102,9 @@
           if (!errors) {
             errors = angular.element('<div bs-input-errors></div>');
             errors.attr('name', name);
+            if (attrs.errors != null) {
+              errors.attr('messages', attrs.errors);
+            }
             errors = $compile(errors)(scope);
             element.append(errors);
           }

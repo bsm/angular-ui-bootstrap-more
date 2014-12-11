@@ -77,6 +77,7 @@ mod.directive 'formGroup', ($compile) ->
       unless errors
         errors = angular.element('<div bs-input-errors></div>')
         errors.attr('name', name)
+        errors.attr('messages', attrs.errors) if attrs.errors?
         errors = $compile(errors)(scope)
         element.append(errors)
       return

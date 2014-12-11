@@ -104,15 +104,15 @@ mod.directive 'ngModel', ->
       word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     words.join(' ')
 
-  postLink = (scope, element, attrs, formGroup) ->
+  preLink = (scope, element, attrs, formGroup) ->
 
     # Automatically set name and ID
     model = attrs.ngModel || ""
     attrs.$set 'name', model.split('.')[1] unless attrs.name
     attrs.$set 'id',   "#{model.replace('.', '_')}" unless attrs.id
 
-    # Stop here if not wrapped in a bs:form-group
-    return unless formGroup
+    # Stop here if not wrapped in a .form-group
+    return unless formGroup && attr.name
 
     # Make this input a form-control
     unless attrs.nocontrol? || attrs.type == 'radio' || attrs.type == 'checkbox'
@@ -127,5 +127,6 @@ mod.directive 'ngModel', ->
   {
     restrict:  'A'
     require:   '^?formGroup'
-    link:      postLink
+    link:
+      pre: preLink
   }

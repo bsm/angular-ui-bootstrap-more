@@ -110,7 +110,6 @@ mod.directive 'formGroup', ($compile) ->
 
   {
     restrict:   'AC'
-    scope:      true
     controller: controller
     link:       postLink
   }

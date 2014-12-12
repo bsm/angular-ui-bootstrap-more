@@ -13,7 +13,7 @@ describe 'directive: suffix', ->
 
   it 'should render', ->
     expect(element.html()).toEqual ""+
-      """<div class="form-group ng-scope" nolabel="" noerrors="">"""+
+      """<div class="form-group" nolabel="" noerrors="">"""+
       """<div class="input-group">"""+
       """<input type="text" ng-model="item.price" suffix="£" class="ng-pristine ng-untouched ng-valid form-control" name="price" id="item_price">"""+
       """<div class="input-group-addon">£</div>"""+
@@ -35,7 +35,7 @@ describe 'directive: suffix-icon', ->
 
   it 'should render', ->
     expect(element.html()).toEqual ""+
-      """<div class="form-group ng-scope" nolabel="" noerrors="">"""+
+      """<div class="form-group" nolabel="" noerrors="">"""+
       """<div class="input-group">"""+
       """<input type="text" ng-model="item.price" suffix-icon="fa fa-dollar" class="ng-pristine ng-untouched ng-valid form-control" name="price" id="item_price">"""+
       """<div class="input-group-addon"><i class="fa fa-dollar"></i></div>"""+

@@ -46,7 +46,7 @@ describe 'directive: ngModel', ->
 
     it 'should expand form-group', ->
       expect(element.html().trim()).toEqual ""+
-        """<div class="form-group ng-scope">"""+
+        """<div class="form-group">"""+
         """<label class="control-label" for="movie_title">Title</label>"""+
         """<input ng-model="movie.title" class="ng-pristine ng-untouched ng-valid form-control" name="title" id="movie_title">"""+
         """<div bs-input-errors="" name="title" class="ng-scope"></div>"""+
@@ -60,7 +60,7 @@ describe 'directive: ngModel', ->
 
     it 'should expand form-group', ->
       expect(element.html().trim()).toEqual ""+
-        """<div class="form-group ng-scope">"""+
+        """<div class="form-group">"""+
         """<input ng-model="movie.title" class="ng-pristine ng-untouched ng-valid form-control">"""+
         """</div>"""
 
@@ -72,7 +72,7 @@ describe 'directive: ngModel', ->
 
     it 'should skip label and errors', ->
       expect(element.html().trim()).toEqual ""+
-        """<div class="form-group ng-scope" nolabel="" noerrors="">"""+
+        """<div class="form-group" nolabel="" noerrors="">"""+
         """<input ng-model="movie.title" class="ng-pristine ng-untouched ng-valid form-control" name="title" id="movie_title">"""+
         """</div>"""
 
@@ -84,7 +84,7 @@ describe 'directive: ngModel', ->
 
     it 'should keep cusomisations', ->
       expect(element.html().trim()).toEqual ""+
-        """<div class="form-group ng-scope" label="Custom" noerrors="">"""+
+        """<div class="form-group" label="Custom" noerrors="">"""+
         """<label class="control-label" for="myid">Custom</label>"""+
         """<input ng-model="movie.title" id="myid" class="ng-pristine ng-untouched ng-valid form-control" name="title">"""+
         """</div>"""
@@ -97,6 +97,6 @@ describe 'directive: ngModel', ->
 
     it 'should not apply form-control class', ->
       expect(element.html().trim()).toEqual ""+
-        """<div class="form-group ng-scope" nolabel="" noerrors="">"""+
+        """<div class="form-group" nolabel="" noerrors="">"""+
         """<input type="radio" ng-model="movie.rating" class="ng-pristine ng-untouched ng-valid" name="rating" id="movie_rating">"""+
         """</div>"""

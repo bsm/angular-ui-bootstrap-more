@@ -138,7 +138,6 @@
     };
     return {
       restrict: 'AC',
-      scope: true,
       controller: controller,
       link: postLink
     };

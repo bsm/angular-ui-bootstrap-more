@@ -15,7 +15,7 @@ describe 'directive: formGroup', ->
       """
 
     it 'should wrap and render', ->
-      expect(element.html().trim()).toEqual """<div class="form-group ng-scope"></div>"""
+      expect(element.html().trim()).toEqual """<div class="form-group"></div>"""
 
   describe 'with label', ->
     beforeEach ->
@@ -25,6 +25,6 @@ describe 'directive: formGroup', ->
 
     it 'should wrap and render', ->
       expect(element.html().trim()).toEqual ""+
-        """<div class="form-group ng-scope" label="Title" label-class="control-title">"""+
+        """<div class="form-group" label="Title" label-class="control-title">"""+
         """<label class="control-label control-title">Title</label>"""+
         """</div>"""

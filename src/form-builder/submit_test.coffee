@@ -4,7 +4,7 @@ describe 'directive: bsSubmit', ->
   beforeEach module('ui.bootstrap.more.form-builder')
   beforeEach inject(($rootScope, $compile) ->
     element = angular.element """
-      <form name="form">
+      <form name="form" bs-form>
         <bs-submit></bs-submit>
       </form>
     """

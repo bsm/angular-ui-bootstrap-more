@@ -6,8 +6,19 @@ mod.factory 'bsInputAddonHook', ->
     addon   = angular.element('<div class="input-group-addon"></div>').append(content)
     element.wrap('<div class="input-group"></div>').parent()[position](addon)
 
+mod.directive 'bsForm', ->
+  {
+    restrict:   'AC'
+    require:    'form'
+    link: (scope, element, attrs) ->
+      attrs.$set 'novalidate', ''
+      return
+    controller: ->
+      return
+  }
+
 mod.directive 'bsSubmit', ($window) ->
-  onLink = (scope, element, attrs) ->
+  postLink = (scope, element, attrs) ->
     attrs.label ||= 'Save'
     scope.onCancel = ->
       $window.history.back()
@@ -15,8 +26,8 @@ mod.directive 'bsSubmit', ($window) ->
 
   {
     restrict: 'AE'
-    require:  '^form'
-    link:     onLink
+    require:  '^bsForm'
+    link:     postLink
     scope:
       label: '@'
     templateUrl: 'template/ui-bootstrap-more/form-builder/submit.html'
@@ -25,30 +36,37 @@ mod.directive 'bsSubmit', ($window) ->
 mod.directive 'prefixIcon', (bsInputAddonHook) ->
   {
     restrict:  'A'
-    require:   'ngModel'
-    link:      (scope, element, attrs) ->
-      bsInputAddonHook(element, 'prepend', "", attrs.prefixIcon)
+    require:   ['^?formGroup', 'ngModel']
+    link:      (scope, element, attrs, ctrls) ->
+      bsInputAddonHook(element, 'prepend', "", attrs.prefixIcon) if ctrls[0]
+      return
   }
 
 mod.directive 'prefix', (bsInputAddonHook) ->
   {
     restrict: 'A'
-    require:   'ngModel'
-    link:     (scope, element, attrs) -> bsInputAddonHook(element, 'prepend', attrs.prefix, null)
+    require:   ['^?formGroup', 'ngModel']
+    link:     (scope, element, attrs, ctrls) ->
+      bsInputAddonHook(element, 'prepend', attrs.prefix, null) if ctrls[0]
+      return
   }
 
 mod.directive 'suffixIcon', (bsInputAddonHook) ->
   {
     restrict:  'A'
-    require:   'ngModel'
-    link:      (scope, element, attrs) -> bsInputAddonHook(element, 'append', "", attrs.suffixIcon)
+    require:   ['^?formGroup', 'ngModel']
+    link:      (scope, element, attrs, ctrls) ->
+      bsInputAddonHook(element, 'append', "", attrs.suffixIcon) if ctrls[0]
+      return
   }
 
 mod.directive 'suffix', (bsInputAddonHook) ->
   {
     restrict: 'A'
-    require:  'ngModel'
-    link:     (scope, element, attrs) -> bsInputAddonHook(element, 'append', attrs.suffix, null)
+    require:   ['^?formGroup', 'ngModel']
+    link:     (scope, element, attrs, ctrls) ->
+      bsInputAddonHook(element, 'append', attrs.suffix, null) if ctrls[0]
+      return
   }
 
 mod.directive 'formGroup', ($compile) ->
@@ -105,29 +123,31 @@ mod.directive 'ngModel', ->
       word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     words.join(' ')
 
-  preLink = (scope, element, attrs, formGroup) ->
+  preLink = (scope, element, attrs, ctrls) ->
+    # Make this input a form-control
+    unless !ctrls[1] || attrs.nocontrol? || attrs.type == 'radio' || attrs.type == 'checkbox'
+      element.addClass('form-control')
+
+    # Stop here if not wrapped in a bs-form
+    return unless ctrls[0]
 
     # Automatically set name and ID
     model = attrs.ngModel || ""
     attrs.$set 'name', model.split('.')[1] unless attrs.name
     attrs.$set 'id',   "#{model.replace('.', '_')}" unless attrs.id
 
-    # Stop here if not wrapped in a .form-group
-    return unless formGroup && attrs.name
-
-    # Make this input a form-control
-    unless attrs.nocontrol? || attrs.type == 'radio' || attrs.type == 'checkbox'
-      element.addClass('form-control')
+    # Stop here if not wrapped in form-group (or no name)
+    return unless ctrls[1] && attrs.name
 
     # Update label and set errors
-    formGroup.controlLabel(titleize(attrs.name), attrs.id)
-    formGroup.inputErrors(attrs.name)
+    ctrls[1].controlLabel(titleize(attrs.name), attrs.id)
+    ctrls[1].inputErrors(attrs.name)
 
     return
 
   {
     restrict:  'A'
-    require:   '^?formGroup'
+    require:   ['^?bsForm', '^?formGroup']
     link:
       pre: preLink
   }

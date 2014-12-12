@@ -8,10 +8,20 @@ describe 'directive: ngModel', ->
       $compile(element)($rootScope)
       $rootScope.$digest()
 
-  describe 'minimal', ->
+  describe 'not wrapped', ->
     beforeEach ->
       prepare """
         <form><input ng-model="movie.title"></form>
+      """
+
+    it 'should extend tag with name and ID', ->
+      expect(element.html().trim())
+        .toEqual """<input ng-model="movie.title" class="ng-pristine ng-untouched ng-valid">"""
+
+  describe 'wrapped in bs-form', ->
+    beforeEach ->
+      prepare """
+        <form bs-form><input ng-model="movie.title"></form>
       """
 
     it 'should extend tag with name and ID', ->
@@ -21,7 +31,7 @@ describe 'directive: ngModel', ->
   describe 'custom name & id', ->
     beforeEach ->
       prepare """
-        <form><input ng-model="movie.title" name="mytitle" id="myid"></form>
+        <form bs-form><input ng-model="movie.title" name="mytitle" id="myid"></form>
       """
 
     it 'should not override', ->
@@ -31,7 +41,7 @@ describe 'directive: ngModel', ->
   describe 'nested within form-group', ->
     beforeEach ->
       prepare """
-        <form><div class="form-group"><input ng-model="movie.title"></div></form>
+        <form bs-form><div class="form-group"><input ng-model="movie.title"></div></form>
       """
 
     it 'should expand form-group', ->
@@ -42,10 +52,22 @@ describe 'directive: ngModel', ->
         """<div bs-input-errors="" name="title" class="ng-scope"></div>"""+
         """</div>"""
 
+  describe 'nested within form-group but not bs-form', ->
+    beforeEach ->
+      prepare """
+        <form><div class="form-group"><input ng-model="movie.title"></div></form>
+      """
+
+    it 'should expand form-group', ->
+      expect(element.html().trim()).toEqual ""+
+        """<div class="form-group ng-scope">"""+
+        """<input ng-model="movie.title" class="ng-pristine ng-untouched ng-valid form-control">"""+
+        """</div>"""
+
   describe 'nested within form-group with nolabel/noerrors', ->
     beforeEach ->
       prepare """
-        <form><div class="form-group" nolabel noerrors><input ng-model="movie.title"></div></form>
+        <form bs-form><div class="form-group" nolabel noerrors><input ng-model="movie.title"></div></form>
       """
 
     it 'should skip label and errors', ->
@@ -57,7 +79,7 @@ describe 'directive: ngModel', ->
   describe 'nested within form-group with custom label and ID', ->
     beforeEach ->
       prepare """
-        <form><div class="form-group" label="Custom" noerrors><input ng-model="movie.title" id="myid"></div></form>
+        <form bs-form><div class="form-group" label="Custom" noerrors><input ng-model="movie.title" id="myid"></div></form>
       """
 
     it 'should keep cusomisations', ->
@@ -70,7 +92,7 @@ describe 'directive: ngModel', ->
   describe 'radio/checkbox inputs', ->
     beforeEach ->
       prepare """
-        <form><div class="form-group" nolabel noerrors><input type="radio" ng-model="movie.rating"></div></form>
+        <form bs-form><div class="form-group" nolabel noerrors><input type="radio" ng-model="movie.rating"></div></form>
       """
 
     it 'should not apply form-control class', ->

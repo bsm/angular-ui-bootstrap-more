@@ -14,9 +14,20 @@
     };
   });
 
+  mod.directive('bsForm', function() {
+    return {
+      restrict: 'AC',
+      require: 'form',
+      link: function(scope, element, attrs) {
+        attrs.$set('novalidate', '');
+      },
+      controller: function() {}
+    };
+  });
+
   mod.directive('bsSubmit', ["$window", function($window) {
-    var onLink;
-    onLink = function(scope, element, attrs) {
+    var postLink;
+    postLink = function(scope, element, attrs) {
       attrs.label || (attrs.label = 'Save');
       scope.onCancel = function() {
         return $window.history.back();
@@ -24,8 +35,8 @@
     };
     return {
       restrict: 'AE',
-      require: '^form',
-      link: onLink,
+      require: '^bsForm',
+      link: postLink,
       scope: {
         label: '@'
       },
@@ -36,9 +47,11 @@
   mod.directive('prefixIcon', ["bsInputAddonHook", function(bsInputAddonHook) {
     return {
       restrict: 'A',
-      require: 'ngModel',
-      link: function(scope, element, attrs) {
-        return bsInputAddonHook(element, 'prepend', "", attrs.prefixIcon);
+      require: ['^?formGroup', 'ngModel'],
+      link: function(scope, element, attrs, ctrls) {
+        if (ctrls[0]) {
+          bsInputAddonHook(element, 'prepend', "", attrs.prefixIcon);
+        }
       }
     };
   }]);
@@ -46,9 +59,11 @@
   mod.directive('prefix', ["bsInputAddonHook", function(bsInputAddonHook) {
     return {
       restrict: 'A',
-      require: 'ngModel',
-      link: function(scope, element, attrs) {
-        return bsInputAddonHook(element, 'prepend', attrs.prefix, null);
+      require: ['^?formGroup', 'ngModel'],
+      link: function(scope, element, attrs, ctrls) {
+        if (ctrls[0]) {
+          bsInputAddonHook(element, 'prepend', attrs.prefix, null);
+        }
       }
     };
   }]);
@@ -56,9 +71,11 @@
   mod.directive('suffixIcon', ["bsInputAddonHook", function(bsInputAddonHook) {
     return {
       restrict: 'A',
-      require: 'ngModel',
-      link: function(scope, element, attrs) {
-        return bsInputAddonHook(element, 'append', "", attrs.suffixIcon);
+      require: ['^?formGroup', 'ngModel'],
+      link: function(scope, element, attrs, ctrls) {
+        if (ctrls[0]) {
+          bsInputAddonHook(element, 'append', "", attrs.suffixIcon);
+        }
       }
     };
   }]);
@@ -66,9 +83,11 @@
   mod.directive('suffix', ["bsInputAddonHook", function(bsInputAddonHook) {
     return {
       restrict: 'A',
-      require: 'ngModel',
-      link: function(scope, element, attrs) {
-        return bsInputAddonHook(element, 'append', attrs.suffix, null);
+      require: ['^?formGroup', 'ngModel'],
+      link: function(scope, element, attrs, ctrls) {
+        if (ctrls[0]) {
+          bsInputAddonHook(element, 'append', attrs.suffix, null);
+        }
       }
     };
   }]);
@@ -141,8 +160,14 @@
       })();
       return words.join(' ');
     };
-    preLink = function(scope, element, attrs, formGroup) {
+    preLink = function(scope, element, attrs, ctrls) {
       var model;
+      if (!(!ctrls[1] || (attrs.nocontrol != null) || attrs.type === 'radio' || attrs.type === 'checkbox')) {
+        element.addClass('form-control');
+      }
+      if (!ctrls[0]) {
+        return;
+      }
       model = attrs.ngModel || "";
       if (!attrs.name) {
         attrs.$set('name', model.split('.')[1]);
@@ -150,18 +175,15 @@
       if (!attrs.id) {
         attrs.$set('id', "" + (model.replace('.', '_')));
       }
-      if (!(formGroup && attrs.name)) {
+      if (!(ctrls[1] && attrs.name)) {
         return;
       }
-      if (!((attrs.nocontrol != null) || attrs.type === 'radio' || attrs.type === 'checkbox')) {
-        element.addClass('form-control');
-      }
-      formGroup.controlLabel(titleize(attrs.name), attrs.id);
-      formGroup.inputErrors(attrs.name);
+      ctrls[1].controlLabel(titleize(attrs.name), attrs.id);
+      ctrls[1].inputErrors(attrs.name);
     };
     return {
       restrict: 'A',
-      require: '^?formGroup',
+      require: ['^?bsForm', '^?formGroup'],
       link: {
         pre: preLink
       }

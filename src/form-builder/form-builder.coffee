@@ -75,7 +75,7 @@ mod.directive 'formGroup', ($compile) ->
     label = errors = undefined
 
     # Insert control label
-    @controlLabel = (caption, target) ->
+    @$$bsFormGroupControlLabel = (caption, target) ->
       return if attrs.nolabel?
 
       unless label
@@ -89,7 +89,7 @@ mod.directive 'formGroup', ($compile) ->
       return
 
     # Insert input errors
-    @inputErrors = (name) ->
+    @$$bsFormControlInputErrors = (name) ->
       return if attrs.noerrors?
 
       unless errors
@@ -105,7 +105,7 @@ mod.directive 'formGroup', ($compile) ->
 
   postLink = (scope, element, attrs, ctrl) ->
     element.addClass('form-group')
-    ctrl.controlLabel(attrs.label) if attrs.label
+    ctrl.$$bsFormGroupControlLabel(attrs.label) if attrs.label
     return
 
   {
@@ -139,8 +139,8 @@ mod.directive 'ngModel', ->
     return unless ctrls[1] && attrs.name
 
     # Update label and set errors
-    ctrls[1].controlLabel(titleize(attrs.name), attrs.id)
-    ctrls[1].inputErrors(attrs.name)
+    ctrls[1].$$bsFormGroupControlLabel(titleize(attrs.name), attrs.id)
+    ctrls[1].$$bsFormControlInputErrors(attrs.name)
 
     return
 

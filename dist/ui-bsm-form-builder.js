@@ -98,7 +98,7 @@
       '$scope', '$element', '$attrs', function(scope, element, attrs) {
         var errors, label;
         label = errors = void 0;
-        this.controlLabel = function(caption, target) {
+        this.$$bsFormGroupControlLabel = function(caption, target) {
           if (attrs.nolabel != null) {
             return;
           }
@@ -114,7 +114,7 @@
             label.attr('for', target);
           }
         };
-        this.inputErrors = function(name) {
+        this.$$bsFormControlInputErrors = function(name) {
           if (attrs.noerrors != null) {
             return;
           }
@@ -133,7 +133,7 @@
     postLink = function(scope, element, attrs, ctrl) {
       element.addClass('form-group');
       if (attrs.label) {
-        ctrl.controlLabel(attrs.label);
+        ctrl.$$bsFormGroupControlLabel(attrs.label);
       }
     };
     return {
@@ -177,8 +177,8 @@
       if (!(ctrls[1] && attrs.name)) {
         return;
       }
-      ctrls[1].controlLabel(titleize(attrs.name), attrs.id);
-      ctrls[1].inputErrors(attrs.name);
+      ctrls[1].$$bsFormGroupControlLabel(titleize(attrs.name), attrs.id);
+      ctrls[1].$$bsFormControlInputErrors(attrs.name);
     };
     return {
       restrict: 'A',

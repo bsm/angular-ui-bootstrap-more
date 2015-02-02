@@ -160,7 +160,7 @@
       return words.join(' ');
     };
     preLink = function(scope, element, attrs, ctrls) {
-      var model;
+      var model, path;
       if (!(!ctrls[1] || (attrs.nocontrol != null) || attrs.type === 'radio' || attrs.type === 'checkbox')) {
         element.addClass('form-control');
       }
@@ -168,16 +168,17 @@
         return;
       }
       model = attrs.ngModel || "";
+      path = model.split('.');
       if (!attrs.name) {
-        attrs.$set('name', model.split('.')[1]);
+        attrs.$set('name', path.slice(1).join('_'));
       }
       if (!attrs.id) {
-        attrs.$set('id', "" + (model.replace('.', '_')));
+        attrs.$set('id', path.join('_'));
       }
       if (!(ctrls[1] && attrs.name)) {
         return;
       }
-      ctrls[1].$$bsFormGroupControlLabel(titleize(attrs.name), attrs.id);
+      ctrls[1].$$bsFormGroupControlLabel(titleize(path[path.length - 1] || ""), attrs.id);
       ctrls[1].$$bsFormControlInputErrors(attrs.name);
     };
     return {

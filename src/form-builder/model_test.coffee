@@ -38,18 +38,28 @@ describe 'directive: ngModel', ->
       expect(element.html().trim())
         .toEqual """<input ng-model="movie.title" name="mytitle" id="myid" class="ng-pristine ng-untouched ng-valid">"""
 
+  describe 'bound to nested model', ->
+    beforeEach ->
+      prepare """
+        <form bs-form><input ng-model="movie.director.name"></form>
+      """
+
+    it 'should extend tag with name and ID', ->
+      expect(element.html().trim())
+        .toEqual """<input ng-model="movie.director.name" class="ng-pristine ng-untouched ng-valid" name="director_name" id="movie_director_name">"""
+
   describe 'nested within form-group', ->
     beforeEach ->
       prepare """
-        <form bs-form><div class="form-group"><input ng-model="movie.title"></div></form>
+        <form bs-form><div class="form-group"><input ng-model="movie.director.name"></div></form>
       """
 
     it 'should expand form-group', ->
       expect(element.html().trim()).toEqual ""+
         """<div class="form-group">"""+
-        """<label class="control-label" for="movie_title">Title</label>"""+
-        """<input ng-model="movie.title" class="ng-pristine ng-untouched ng-valid form-control" name="title" id="movie_title">"""+
-        """<div bs-input-errors="" name="title" class="ng-scope"></div>"""+
+        """<label class="control-label" for="movie_director_name">Name</label>"""+
+        """<input ng-model="movie.director.name" class="ng-pristine ng-untouched ng-valid form-control" name="director_name" id="movie_director_name">"""+
+        """<div bs-input-errors="" name="director_name" class="ng-scope"></div>"""+
         """</div>"""
 
   describe 'nested within form-group but not bs-form', ->

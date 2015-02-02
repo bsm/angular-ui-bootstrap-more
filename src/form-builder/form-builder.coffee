@@ -132,14 +132,15 @@ mod.directive 'ngModel', ->
 
     # Automatically set name and ID
     model = attrs.ngModel || ""
-    attrs.$set 'name', model.split('.')[1] unless attrs.name
-    attrs.$set 'id',   "#{model.replace('.', '_')}" unless attrs.id
+    path  = model.split('.')
+    attrs.$set 'name', path[1..].join('_') unless attrs.name
+    attrs.$set 'id',   path.join('_')      unless attrs.id
 
     # Stop here if not wrapped in form-group (or no name)
     return unless ctrls[1] && attrs.name
 
     # Update label and set errors
-    ctrls[1].$$bsFormGroupControlLabel(titleize(attrs.name), attrs.id)
+    ctrls[1].$$bsFormGroupControlLabel(titleize(path[path.length-1] || ""), attrs.id)
     ctrls[1].$$bsFormControlInputErrors(attrs.name)
 
     return

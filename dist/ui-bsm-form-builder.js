@@ -192,4 +192,4 @@
 
 }).call(this);
 
-angular.module("ui.bootstrap.more.form-builder").run(["$templateCache", function($templateCache) {$templateCache.put("template/ui-bootstrap-more/form-builder/submit.html","<div class=\"form-group\">\n  <button class=\"btn btn-primary\" type=\"submit\" ng-bind=\"label\"></button>\n  <button class=\"btn btn-default\" type=\"cancel\" ng-click=\"onCancel()\">Cancel</button>\n</div>\n");}]);
+angular.module("ui.bootstrap.more.form-builder").run(["$templateCache", function($templateCache) {$templateCache.put("template/ui-bootstrap-more/form-builder/submit.html","<div class=\"form-group\">\n  <button class=\"btn btn-primary\" type=\"submit\" ng-bind=\"label\"></button>\n  <a class=\"btn btn-default\" ng-click=\"onCancel()\">Cancel</a>\n</div>\n");}]);

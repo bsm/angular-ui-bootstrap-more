@@ -17,6 +17,6 @@ describe 'directive: bsSubmit', ->
     expect(element.html())
       .toContain("""<button class="btn btn-primary ng-binding" type="submit" ng-bind="label">Save</button>""")
     expect(element.html())
-      .toContain("""<button class="btn btn-default" type="cancel" ng-click="onCancel()">Cancel</button>""")
+      .toContain("""<a class="btn btn-default" ng-click="onCancel()">Cancel</a>""")
 
 
